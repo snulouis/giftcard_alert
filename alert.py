@@ -32,7 +32,7 @@ alert_str = ''
 
 
 def send(text):
-	sendMail('louis.tw.kim@gmail.com', 'louis.tw.kim@gmail.com', text)
+	sendMail('louis.tw.kim@gmail.com', ['louis.tw.kim@gmail.com'], text)
 
 def alert(market_name, content, rate):
 	global alert_str
@@ -73,7 +73,7 @@ def gmarket_crawler(content):
 				div_str = div_str.split('할인률')[1]
 				div_str = div_str.split('%')[0]
 				div_int = int(div_str)
-				if div_int >= 7:
+				if div_int > 7:
 					alert(market, content, str(div_int) + '%')
 				break
 
@@ -112,7 +112,7 @@ def auction_crawler(content):
 	
 			if 'text--discount' in cls:
 				div_int = int(div.text)
-				if div_int >= 7:
+				if div_int > 7:
 					alert(market, content, str(div_int) + '%' )
 				break
 
@@ -151,7 +151,7 @@ def eleven_crawler(content):
 				div_str = div_str.split('\",\"')[0]
 				div_str = div_str.replace(',','')
 				div_int = int(div_str)
-				if div_int <= 47000:
+				if div_int < 46500:
 					alert(market, content, div_int)
 				break
 
@@ -202,7 +202,7 @@ def wemake_crawler(content):
 				div_str = div_str.split('%')[1]
 				div_int = int(div_str)
 				print(div_int)
-				if div_int >= 7:
+				if div_int > 7:
 					alert(market, content, str(div_int) + '%')
 				break
 
