@@ -32,7 +32,7 @@ alert_str = ''
 
 
 def send(text):
-	sendMail('louis.tw.kim@gmail.com', ['louis.tw.kim@gmail.com'], text)
+	sendMail('louis.tw.kim@gmail.com', ['louis.tw.kim@gmail.com', 'properitas95@gmail.com'], text)
 
 def alert(market_name, content, rate):
 	global alert_str
