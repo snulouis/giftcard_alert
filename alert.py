@@ -37,6 +37,8 @@ def send(text):
 def alert(market_name, content, rate):
 	global alert_str
 	alert_str += f'{market_name}에서 {content} 상품권 {rate} 할인 중 입니다.\n'
+	alert_str += url[market_name][content] + '\n\n'
+
 
 def gmarket_crawler(content):
 	market = 'gmarket'
