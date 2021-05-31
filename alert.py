@@ -212,7 +212,7 @@ def wemake_crawler(content):
 
 def main():
 	global alert_str
-	'''
+
 	gmarket_crawler('happy_money')
 	gmarket_crawler('book_and_life')
 	gmarket_crawler('merge_point')
@@ -224,14 +224,16 @@ def main():
 	eleven_crawler('happy_money')
 	eleven_crawler('book_and_life')
 	eleven_crawler('merge_point')
-	'''
 
+	'''
 	wemake_crawler('happy_money')
 	wemake_crawler('book_and_life')
 	wemake_crawler('merge_point')
+	'''
 
 	print(alert_str)
-	#send(alert_str)
+	if alert_str:
+		send(alert_str)
 
 
 if __name__ == '__main__':
