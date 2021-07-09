@@ -27,17 +27,59 @@ url['wemake']['happy_money'] = 'https://search.wemakeprice.com/search?search_cat
 url['wemake']['book_and_life'] = 'https://search.wemakeprice.com/search?search_cate=top&keyword=%EB%B6%81%EC%95%A4%EB%9D%BC%EC%9D%B4%ED%94%84%205%EB%A7%8C%EC%9B%90&isRec=1&_service=5&_type=3'
 url['wemake']['merge_point'] = 'https://search.wemakeprice.com/search?search_cate=top&keyword=%EB%A8%B8%EC%A7%80%ED%8F%AC%EC%9D%B8%ED%8A%B8&isRec=1&_service=5&_type=3'
 
+url['tmon'] = {}
+url['tmon']['happy_money'] = 'https://search.tmon.co.kr/search/?keyword=%ED%95%B4%ED%94%BC%EB%A8%B8%EB%8B%88%205%EB%A7%8C%EC%9B%90%EA%B6%8C&thr=hs'
+url['tmon']['book_and_life'] = 'https://search.tmon.co.kr/search/?keyword=%EB%B6%81%EC%95%A4%EB%9D%BC%EC%9D%B4%ED%94%84%205%EB%A7%8C%EC%9B%90%EA%B6%8C&thr=hs'
+url['tmon']['merge_point'] = 'https://search.tmon.co.kr/search/?keyword=%EB%A8%B8%EC%A7%80%ED%8F%AC%EC%9D%B8%ED%8A%B8&thr=hs'
+
+url['danawa'] = {}
+url['danawa']['happy_money'] = 'http://prod.danawa.com/info/?pcode=5232151&keyword=%ED%95%B4%ED%94%BC%EB%A8%B8%EB%8B%88&cate=19231551'
+url['danawa']['book_and_life'] = 'http://prod.danawa.com/info/?pcode=5232567&keyword=%EB%B6%81%EC%95%A4%EB%9D%BC%EC%9D%B4%ED%94%84&cate=19231551'
+
 
 alert_str = ''
 
 
 def send(text):
-	sendMail('louis.tw.kim@gmail.com', ['louis.tw.kim@gmail.com', 'properitas95@gmail.com'], text)
+	#sendMail('louis.tw.kim@gmail.com', ['louis.tw.kim@gmail.com', 'properitas95@gmail.com'], text)
+	sendMail('louis.tw.kim@gmail.com', ['louis.tw.kim@gmail.com'], text)
+
+
 
 def alert(market_name, content, rate):
 	global alert_str
 	alert_str += f'{market_name}에서 {content} 상품권 {rate} 할인 중 입니다.\n'
-	alert_str += url[market_name][content] + '\n\n'
+	alert_str += url[market_name][content]
+
+
+def danawa_crawler(content):
+	market = 'danawa'
+
+	html = urlopen(url[market][content]) 
+
+	bsObject = BeautifulSoup(html,"html.parser")
+	print(bsObject.find_all())
+
+	# Rate Checker -------------------------------------
+	for div in bsObject.find_all('li'):
+		print(div)
+		cls = div.get('class')
+		if cls is None:
+			continue
+
+		if 'rank_one' in cls:
+			div_str = div.text
+			div_str = div_str.split('price_sect')[1]
+			div_str = div_str.split('<strong>')[1]
+			div_str = div_str.split('</strong>')[0]
+			div_str = div_str.replace(',', '')
+			div_int = int(div_str)
+			print(div_str)
+			print(div_int)
+			if div_int <= 46500:
+				alert(market, content, str(div_int))
+			break
+
 
 
 def gmarket_crawler(content):
@@ -71,7 +113,7 @@ def gmarket_crawler(content):
 				continue
 
 			if 'box__discount' in cls:
-				div_str = div.text.split('text__value\">')[0]
+				div_str = div.text
 				div_str = div_str.split('할인률')[1]
 				div_str = div_str.split('%')[0]
 				div_int = int(div_str)
@@ -200,7 +242,7 @@ def wemake_crawler(content):
 			print(div.text.decode('iso-8859-1'))
 
 			if 'price_info' in cls:
-				div_str = div.text.split('\=sale\">')[0]
+				div_str = div.text.split('sale\">')[0]
 				div_str = div_str.split('%')[1]
 				div_int = int(div_str)
 				print(div_int)
@@ -211,9 +253,85 @@ def wemake_crawler(content):
 
 
 
+def tmon_crawler(content):
+	market = 'tmon'
+
+	html = urlopen(url[market][content]) 
+
+	bsObject = BeautifulSoup(html, "html.parser") 
+
+
+	print(bsObject)
+	
+	# Existance Checker -------------------------------------
+	if content in search.keys():
+		is_here = False
+		
+		for div in bsObject.find_all('span'):
+			cls = div.get('class')
+			if cls is None:
+				continue
+
+			if 'sale' in cls:
+				for k, v in search['content'].items():
+					if v in div.text:
+						is_here = True
+						break
+		if is_here:
+			alert(market, content, '판매')
+	
+	# Rate Checker -------------------------------------
+	else:
+		for div in bsObject.find_all('span'):
+			cls = div.get('class')
+			if cls is None:
+				continue
+			print(div)
+	
+			if 'sale' in cls:
+				div_str = div.text.split('num\">')[0]
+				div_str = div_str.split('판매가:')[1]
+				div_str = div_str.split('원')[0]
+				div_str = div_str.replace(',','')
+				div_int = int(div_str)
+				if div_int < 49500:
+					alert(market, content, str(div_int))
+				break
+	
+
 
 def main():
 	global alert_str
+
+	from selenium import webdriver
+
+	driver = webdriver.Chrome('./chromedriver')
+
+	driver.get(url['danawa']['happy_money'])
+	elements = driver.find_elements_by_css_selector('#blog_content > div.summary_info > div.detail_summary > div.summary_left > div.lowest_area > div.lowest_top > div > span.lwst_prc > a > em')
+	price_str = elements[0].text.replace(',', '')
+	price_int = int(price_str)
+
+	if price_int <= 46500:
+		alert('danawa', 'happy_money', str(price_int))
+
+	driver.quit()
+	driver = webdriver.Chrome('./chromedriver')
+
+	driver.get(url['danawa']['book_and_life'])
+	elements = driver.find_elements_by_css_selector('#blog_content > div.summary_info > div.detail_summary > div.summary_left > div.lowest_area > div.lowest_top > div > span.lwst_prc > a > em')
+	price_str = elements[0].text.replace(',', '')
+	price_int = int(price_str)
+
+	if price_int <= 46500:
+		alert('danawa', 'book_and_life', str(price_int))
+
+
+	driver.quit()
+	
+
+	'''
+	danawa_crawler('happy_money')
 
 	gmarket_crawler('happy_money')
 	gmarket_crawler('book_and_life')
@@ -227,16 +345,18 @@ def main():
 	eleven_crawler('book_and_life')
 	eleven_crawler('merge_point')
 
-	'''
 	wemake_crawler('happy_money')
 	wemake_crawler('book_and_life')
 	wemake_crawler('merge_point')
+
+	tmon_crawler('happy_money')
+	tmon_crawler('book_and_life')
+	tmon_crawler('merge_point')
 	'''
 
 	print(alert_str)
 	if alert_str:
 		send(alert_str)
-
 
 if __name__ == '__main__':
 	main()
