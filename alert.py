@@ -304,8 +304,18 @@ def main():
 	global alert_str
 
 	from selenium import webdriver
+	from selenium.webdriver.chrome.options import Options
 
 	driver = webdriver.Chrome('./chromedriver')
+
+	chrome_options = Options()
+	chrome_options.add_argument('--headless')
+	chrome_options.add_argument('--no-sandbox')
+	chrome_options.add_argument('--disable-dev-shm-usage')
+	driver = webdriver.Chrome('./chromedriver', options=chrome_options)
+
+
+
 
 	driver.get(url['danawa']['happy_money'])
 	elements = driver.find_elements_by_css_selector('#blog_content > div.summary_info > div.detail_summary > div.summary_left > div.lowest_area > div.lowest_top > div > span.lwst_prc > a > em')
@@ -316,7 +326,9 @@ def main():
 		alert('danawa', 'happy_money', str(price_int))
 
 	driver.quit()
-	driver = webdriver.Chrome('./chromedriver')
+	driver = webdriver.Chrome('./chromedriver', options=chrome_options)
+
+
 
 	driver.get(url['danawa']['book_and_life'])
 	elements = driver.find_elements_by_css_selector('#blog_content > div.summary_info > div.detail_summary > div.summary_left > div.lowest_area > div.lowest_top > div > span.lwst_prc > a > em')
